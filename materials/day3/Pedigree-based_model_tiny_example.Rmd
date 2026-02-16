@@ -1,0 +1,191 @@
+---
+title: "Pedigree-based linear mixed model - tiny example"
+author: "Gregor Gorjanc and Gabriela Mafra Fortuna"
+output: pdf_document
+---
+
+# Introduction
+
+Following the lecture slides we will show the tiny example of pedigree-based
+linear mixed model.
+
+```{r}
+# Clean the working environment
+rm(list = ls())
+```
+
+# Approach 1: Setup matrices "by hand"
+
+First we define our inputs.
+
+```{r}
+# Phenotype vector
+y <- matrix(data = c(2.4, 4.1, 4.5))
+y
+
+# Design matrix for fixed effects
+X <- matrix(data = c(1, 1, 1))
+X
+
+# Design matrix for breeding values
+Z <- matrix(data = c(0, 1, 0, 0,
+                     0, 0, 1, 0,
+                     0, 0, 0, 1), byrow = TRUE, nrow = 3)
+Z
+
+# Design matrix for pedigree
+T <- matrix(data = c(  1,   0,   0, 0,
+                       0,   1,   0, 0,
+                     1/2, 1/2,   1, 0,
+                     3/4, 1/4, 1/2, 1), byrow = TRUE, nrow = 4)
+T
+
+# Conditional variance matrix for pedigree
+R <- diag(x = c(1, 1, 0.5, 0.5))
+R
+
+# Pedigree-based Numerator Relationship Matrix (NRM)
+A <- T %*% R %*% t(T)
+
+# Variance components
+sigma2e <- 0.1
+sigma2a <- 0.1
+```
+
+Now we setup and solve the Mixed Model Equations (MME).
+
+```{r}
+# Left Hand Side (LHS) components
+# XtX <- t(X) %*% X
+XtX <- crossprod(X)
+XtX
+
+# XtZ <- t(X) %*% Z
+XtZ <- crossprod(X, Z)
+XtZ
+
+ZtX <- t(XtZ)
+ZtX
+
+# ZtZ <- t(Z) %*% Z
+ZtZ <- crossprod(Z)
+ZtZ
+
+# Inverse of pedigree-based NRM
+AInv <- solve(A)
+
+# LHS
+LHS <- rbind(cbind(XtX, XtZ),
+             cbind(ZtX, ZtZ + AInv * sigma2e / sigma2a))
+LHS
+
+# Right Hand Side (RHS) components
+# Xty <- t(X) %*% y
+Xty <- crossprod(X, y)
+Xty
+
+# Zty <- t(X) %*% y
+Zty <- crossprod(Z, y)
+Zty
+
+# RHS
+RHS <- rbind(Xty,
+             Zty)
+RHS
+```
+
+Finally, we solve the MME and deliver conditional means and covariances.
+
+```{r}
+# Inverse of the LHS
+LHSInv <- solve(LHS)
+
+# Solutions --> conditional means
+sol <- LHSInv %*% RHS
+# If we do not have access to LHSInv we could use
+# sol <- solve(LHS, RHS)
+sol
+
+# Conditional covariance
+PEC <- LHSInv * sigma2e
+
+# Presentation of results
+results <- data.frame(parameter = c("mu", paste0("a", 1:4)),
+                      mean = sol,
+                      var = diag(PEC))
+results$reliability <- c(NA, 1 - results$var[-1] / (sigma2a * diag(A)))
+results
+```
+
+# Approach 2: Setup matrices using R packages Matrix & pedigreeTools, then solve
+
+First we define our inputs.
+
+```{r}
+# install.packages(pkg = "pedigreeTools")
+library(package = "pedigreeTools") # for getX()
+library(package = "Matrix") # for sparse.model.matrix()
+
+pedigree <- data.frame(individual = c(1, 2, 3, 4),
+                       father = c(0, 0, 1, 1),
+                       mother = c(0, 0, 2, 3))
+pedigree2 <- pedigreeTools::pedigree(label = pedigree$individual,
+                                     sire = pedigree$father,
+                                     dam = pedigree$mother)
+
+phenotypes <- data.frame(individual = c(2, 3, 4),
+                         phenotype = c(2.4, 4.1, 4.5))
+phenotypes$individual <- factor(x = phenotypes$individual, levels = pedigree$individual)
+
+# Phenotype vector
+y <- phenotypes$phenotype
+y
+
+# Design matrix for fixed effects
+# X <- model.matrix(phenotypes$phenotype ~ 1) # dense
+X <- sparse.model.matrix(phenotypes$phenotype ~ 1) # sparse
+X
+
+# Design matrix for breeding values
+# Z <- model.matrix(phenotypes$phenotype ~ phenotypes$individual - 1) # dense
+Z <- sparse.model.matrix(phenotypes$phenotype ~ phenotypes$individual - 1) # sparse
+Z
+
+# Design matrix for pedigree
+T <- getT(ped = pedigree2)
+T
+
+# Conditional variance matrix for pedigree
+R <- getD(ped = pedigree2)
+R
+
+# Pedigree-based Numerator Relationship Matrix (NRM)
+# A <- as.matrix(T) %*% diag(R) %*% t(as.matrix(T))
+A <- getA(ped = pedigree2)
+A
+
+# Inverse pedigree-based NRM
+AInv <- getAInv(ped = pedigree2)
+AInv
+
+# This shows how the inverse is actually built
+# ... Pedigree Directed Acyclic Graph (DAG) matrix
+TInv <- getTInv(ped = pedigree2)
+TInv
+
+# ... Inverse of Mendelian sampling variance
+RInv <- Diagonal(x = 1 / R)
+RInv
+
+# ... Getting the inverse via generalised Cholesky factorisation
+AInv2 <- t(TInv) %*% RInv %*% TInv
+AInv2
+# ... Compare getAInv() vs the above approach (~1e-16 diffs are OK!)
+AInv - AInv2
+
+# Variance components
+sigma2e <- 0.1
+sigma2a <- 0.1
+```
+
+Exercise: Now you can repeat the code from above to setup and solve MME.

@@ -1,0 +1,278 @@
+---
+title: "Matrix algebra"
+author: "Chrissy Rochus"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+This Rmarkdown file corresponds to the examples in the lecture on "Matrix algebra". 
+
+# Special matrices
+
+Two of the special square matrices can be made with the base R function "diag()".  The first is the identity matrix (off diagonal are zeros, diagonals are all 1s).  Since it is square, within the brackets, include the number of columns/rows needed.
+
+```{r}
+# For an identity matrix with 3 rows and 3 columns
+diag(3)
+```
+
+Diagonal matrices can also be made with the "diag()" function.  Within the brackets, provide the values for the diagonal of the square matrix.
+
+```{r}
+# For a diagonal matrix with a diagonal of 5, -3, and 1
+diag(c(9, 3, -1))
+```
+
+# Addition
+
+Two matrices can be added together if they have the same number of rows and columns.
+
+```{r}
+
+A <- matrix(c(9,-11,2,5),nrow=2,ncol=2)
+A
+
+B <- matrix(c(13,8,-7,4),nrow=2,ncol=2)
+B
+
+A + B
+
+```
+
+# Subtraction
+
+A matrix can be subtracted from another if they have the same number of rows and columns.
+
+```{r}
+A - B
+```
+
+# Multiplication
+
+Two matrices can be multiplied if the number of columns in the first matrix equals the number of rows in the second.
+
+```{r}
+E <- matrix(c(-1,6,4,5,-2,-3,3,4,6),nrow=3,ncol=3)
+E
+
+G <- matrix(c(4,2,-6,-5,3,1),nrow=3,ncol=2)
+G
+
+# For multiplying scalars in R, use the operator '*', for matrices, use '%*%'
+E%*%G
+
+```
+# Dot product
+
+The sum of the products of two equal length vectors.
+
+```{r}
+
+a <- c(7,-2,1)
+a
+
+b <- c(3,5,-4)
+b
+
+# When vectors are stored as values, use '%*%' to multiply them to get the dot product
+
+a%*%b
+
+```
+# Multiplying a scalar and a matrix
+
+Multiplying a matrix with a scalar, multiplies each element of the matrix with the scalar.
+
+```{r}
+
+4*E
+
+# In which order the scalar and matrix are multiplied doesn't matter
+# 4*E is equal to E*4
+
+E*4
+
+```
+
+# Direct (Kronecker) product of matrices
+
+For a matrix, E (order r x s), and H (order m x n), the direct product, has an order of rm x sn.
+
+```{r}
+
+H <- matrix(c(4,2,-5,3),nrow=2,ncol=2)
+
+kronecker(E, H)
+
+# The direct product of E and H is not equal to the direct product of
+# H and E
+kronecker(H, E)
+
+```
+
+# Hardamard product
+
+For two matrices of the same dimension, the Hardamard product has the same dimensions.
+
+```{r}
+
+X <- matrix(c(7,2,-4,2,3,0,-4,0,-9),nrow=3,ncol=3)
+X
+
+E
+
+E*X
+
+# The Hardamard product of E and X is equal to the Hardamard product
+# of X and E
+X*E
+
+```
+
+# Transpose
+
+For a matrix J, with order i x k, the transpose, J’ has order i x k.
+
+A matrix is not equal to its transpose unless it is a symmetric matrix (like matrix W).
+
+
+```{r}
+
+J <- matrix(c(5,-1,6,3,4,-2),nrow=3,ncol=2)
+
+J
+
+t(J)
+
+W <- matrix(c(7,2,-4,2,3,0,-4,0,-9),nrow=3,ncol=3)
+
+W
+
+t(W)
+
+```
+
+# Dot product, part 2
+
+When vectors are stored as matrices (with row = 1), use '%*%' to multiply one with the transpose of the other to get the dot product
+
+```{r}
+
+a <- matrix(c(7,-2,1),nrow=1,ncol=3)
+a
+
+b <- matrix(c(3,5,-4),nrow=1,ncol=3)
+b
+
+a%*%t(b)
+
+```
+
+# Trace
+
+The sum of the diagonal elements of a matrix.
+
+```{r}
+
+sum(diag(W))
+
+```
+
+# Inversion
+
+When an inverse of a matrix is multiplied by the matrix (W in this example), an identity matrix (I) is the product.
+
+Only square matrices can be inverted.
+
+For a diagonal matrix, Y, the inverse is the reciprocal of the diagonal elements.
+
+```{r}
+
+solve(W)%*%W
+
+Y <- diag(c(5,-10,2))
+Y
+
+solve(Y)
+
+# Z is a 2x2 matrix example
+
+Z <- matrix(c(3,2,-1,5),nrow=2,ncol=2)
+
+solve(Z)
+  
+```
+
+# Rank
+
+The number of linearly independent rows or columns.
+
+A square matrix with rank equal to the number of rows or columns is full rank.
+
+```{r}
+N <- matrix(c(2,5,-3,5,3,2,2,1,1),nrow=3,ncol=3)
+
+N
+
+SVD <- svd(N) # singular value decomposition of the matrix
+
+sum(SVD$d > 1e-10) # rank equals the number of nonzero singular values
+
+```
+
+# Generalised inverse
+
+There are many different ways to calculate a generalised inverse, so this inverse may not be the same as the one calculated using pen and paper for this example.
+
+```{r}
+
+# If the "MASS" package hasn't already been installed,
+# use the following line to install it (remove # and run)
+#install.packages("MASS")
+library(MASS)
+
+ginv(N)
+
+# There are different ways to calculate the generalised inverse, but this is 
+# one way to test if the generalised inverse calculated is correct: 
+# the matrix (N) multiplied by its inverse, multiplied by N is equal to N.
+N %*% ginv(N) %*% N
+
+N
+
+```
+
+# Eigenvalues and eigenvectors
+
+Eigenvalues are useful in simplifying multivariate evaluations when transforming data.
+
+```{r}
+
+res = eigen(N)
+
+# Eigen values
+res$values
+
+# Eigen vectors
+res$vectors
+
+```
+
+# Cholesky decomposition
+
+The Cholesky decomposition of a matrix (K) is a lower triangular matrix (V).  We can derive V from K.
+
+
+```{r}
+
+K <- matrix(c(9,3,-6,3,5,0,-6,0,21),nrow=3,ncol=3)
+K
+
+# Use chol() to find the transpose of V
+V <- t(chol(K))
+V
+
+# K is equal to V%*%t(V)
+V%*%t(V)
+
+```

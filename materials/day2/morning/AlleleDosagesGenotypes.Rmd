@@ -1,0 +1,213 @@
+---
+title: "Allele dosages and genotypes"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+# Alleles, haplotypes, and genotypes
+
+You have seen how to represent a sequence of SNPs in a given chromosome region
+(haplotype) and how adding this sequences together informs you about an
+individual's genotype.
+
+Although we are using short examples that are easily done by hand, you can take
+advantage of R to solve this problems using vectors. 
+
+Below is the first example. Run the code below to (1) store both haplotype 1
+and haplotype 2 as vectors and (2) sum up the vectors to obtain the genotype.
+
+```{r}
+hap1 = c(0, 1, 1, 0, 0, 1)
+hap2 = c(1, 1, 1, 1, 0, 0)
+
+genotype = hap1 + hap2
+print(genotype)
+```
+
+```{r}
+hap3 = c(0, 0, 1, 1, 0, 1)
+hap4 = c(0, 0, 0, 0, 1, 1)
+
+genotype2 = hap3 + hap4
+print(genotype2)
+```
+
+# Values of alleles, haplotypes, and genotypes
+
+We can also store the effects for each locus in a vector and obtain the genetic
+values by vector multiplication:
+
+```{r}
+effect = c(+1, +2, -1, +1, +1, -2)
+
+gen_value_hap1 = hap1 * effect
+gen_value_hap2 = hap2 * effect
+
+print(gen_value_hap1)
+print(gen_value_hap2)
+```
+
+The final genetic value for that genotype can be obtained by summing the results
+below OR by multiplying the previous result (the vector genotype) by the effect.
+
+```{r}
+# Obtaining total genetic value by summing haplotype values
+total_gen_val = gen_value_hap1 + gen_value_hap2
+print(total_gen_val)
+
+# Obtaining total genetic value by multiplying the genotype by the loci effects 
+total_gen_val = genotype * effect
+print(total_gen_val)
+```
+
+We can also calculate the total effect for each haplotype simply by summing the
+values in the vector. The total genetic value of the genotype is then the sum of
+the total genetic value of the haplotypes: 
+
+```{r}
+hap1_sum = sum(gen_value_hap1)
+print(hap1_sum)
+
+hap2_sum = sum(gen_value_hap2)
+print(hap2_sum)
+
+geno_sum = sum(hap1_sum, hap2_sum)
+print(geno_sum)
+```
+
+You can try the same procedures for haplotypes 3-6.
+
+When you finish, try creating 2 new haplotypes and determining their genotypes.
+Assign some loci effects and calculate the genetic value for each position and
+the overall genetic value for the genotype. 
+
+```{r}
+# Write your code here!
+```
+
+# Summarising genetic variation
+
+We can draw some information information about SNPs using some general R code.
+Here are the animal ID and the SNPs are saved into a data frame.  We can use the
+genSummary function (created specific for this example - you can find it at the begging of the file) to calculate mean, standard deviation and other statistic and genetic parameters. 
+
+```{r}
+genotype_allele_dosage = data.frame(Animal = c(1, 2, 3, 4, 5),
+                                    SNP1   = c(0, 2, 2, 1, 0),
+                                    SNP2   = c(0, 1, 0, 1, 0) 
+                               )
+print(genotype_allele_dosage)
+
+# This is a function for getting a statistical and genetic summary of SNPs
+genSummary <- function(genotype_table) {
+  genotype_table = data.frame(Mean = round(sapply(genotype_table[-1], mean), 2),
+                              Standard_deviation = round(sapply(genotype_table[-1], sd), 2),
+                              Variation = round(sapply(genotype_table[-1], var), 2),
+                              Allele_Frequency = round(sapply(genotype_table[-1], mean)/2, 2),
+                              Genic_variance = round(2*(sapply(genotype_table[-1], 
+                                                        FUN = mean)/2)*(1-(sapply(genotype_table[-1], mean)/2)), 2))
+  return(genotype_table)
+}
+
+genSummary(genotype_allele_dosage)
+cat('Correlation: ', cor(genotype_allele_dosage$SNP1, genotype_allele_dosage$SNP2))
+```
+
+We can also add extra SNP data by using the function `cbind` (which binds/adds
+information to a data farme columnwise).
+
+```{r}
+genotype_allele_dosage = cbind(genotype_allele_dosage,
+                               data.frame(SNP3 = c(1, 0, 2, 0, 0),
+                                          SNP4 = c(0, 1, 2, 1, 0)))
+print(genotype_allele_dosage)
+
+genSummary(genotype_allele_dosage)
+cat('Correlation: SNP 3 - 4', cor(genotype_allele_dosage$SNP3, genotype_allele_dosage$SNP4))
+```
+You can give it a try adding some extra SNPs and summarising the full data frame. 
+
+```{r}
+# Write your code :)
+```
+
+# Variation in phenotypic values
+
+You have seen that the phenotypic value for a individual ($y_i$) is a function
+of the population mean ($\mu$), the individual's genetic value ($g_i$) and its
+environmental value ($e_i$). Both the genetic value and environmental value are
+expressed as deviation from the mean.
+
+Use the parameters provided bellow to calculate the expected and realised
+phenotype value for tree genotypes (environmental effects can be drawn from a
+normal distribution with variance $\sigma_e^2$):
+
+```{r}
+mu = 15
+g_1 = 0
+g_2 = 1
+g_3 = 2
+allele_effect = -2
+sigma2e = 1
+e_i = rnorm(n=3, mean=0, sd=sigma2e)
+# setting n=3 to generate 3 random numbers. Can be any value
+
+e_1= e_i[1]
+e_2 = e_i[2]
+e_3 = e_i[3]
+
+(y_1 = mu + g_1 * allele_effect + e_1)
+(y_2 = mu + g_2 * allele_effect + e_2)
+(y_3 = mu + g_3 * allele_effect + e_3)
+```
+
+# Source of variation between individuals
+
+Considering the parents A, B and C constitute of the haplotypes with allele
+values as shown below with 2x6 matrices (haplotypes x SNP).
+
+```{r}
+A = matrix(c(+1, 0, 0, +1, 0, -2,
+              0, 0, 0,  0, 0, -2), nrow = 2, byrow = TRUE)
+print(A)
+
+B = matrix(c( 0, +2, -1,  0, 0, -2,
+             +1, +2, -1, +1, 0,  0), nrow = 2, byrow = TRUE)
+print(B)
+
+C = matrix(c(+1, 0, -1, +1, +1,  0,
+             +1, +2, 0, +1,  0,  0), nrow = 2, byrow = TRUE)
+print(C)
+```
+The genetic value for each haplotype in each individual (matrix) can be obtained
+by suming, which in R we can achieve with `rowSums()`:
+
+```{r}
+rowSums(A)
+rowSums(B)
+rowSums(C)
+```
+
+And we can use these sums (or the sums of the haplotype values - the genetic value)
+to determine each parent's expected phenotype:
+
+```{r}
+mu = 10
+
+y_A = mu + sum(A)
+y_B = mu + sum(B)
+y_C = mu + sum(C)
+
+print(y_A)
+print(y_B)
+print(y_C)
+```
+
+Now, using the pairs A/B and B/C, generate some progeny and determine the progeny
+realised phenotype (you can draw the environmental effect using the `rnorm()`
+function once more with `sigma2e = 1`)
+
+```{r}
+# Add your code here.
+```
+ 

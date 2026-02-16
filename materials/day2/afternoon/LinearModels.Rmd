@@ -1,0 +1,451 @@
+---
+title: "Linear models: examples in R"
+author: "Chrissy Rochus"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Learning objectives
+
+* Linear models
+    + Fixed effects
+    + Fixed and random effects
+* Matrix format
+
+# R functions
+
+There are several functions for implementing linear models in R.  Two of these functions are found in base R: "lm()" and "glm()".  "lm()" allows for linear models with fixed effects and a response variable with a normal distribution.  "glm()" allows for linear models with fixed effects, with the option for the response variable to have a normal, or other type of distribution (this is called a generalised linear model).
+
+We have a *simulated* pig data set that includes a column for the animal identification ("id", a unique integer), sex ("M" - male or "F" - female), contemporary group (an integer representing herd-year-season), eye colour, live weight (in kg), growth rate (in kg/day), and fat percentage (proportion of the carcass that is fat).
+
+
+```{r}
+
+# Read in the "pig_live_weight_2.txt"
+# Make sure the file is in your working directory/you include the path to the file
+lw <- read.table("pig_live_weight.txt", h=T)
+
+# Take a look at the first 5 rows to get a feel for what the data looks like
+head(lw, n=5)
+
+```
+
+
+R automatically detects the type of data in each column.
+
+
+```{r}
+
+# To view the structure of a data frame (number of observations and variables,
+# and the type of data in each column)
+str(lw)
+
+```
+
+
+There are 5 types of data you will likely see: numeric (integers or decimals), integer (numbers without decimals), logical ("TRUE" and "FALSE", or "T" and "F"), character (used to store text, strings) and factor (categorical variables).
+
+
+```{r}
+
+# To change the data type, for example change sex from a character (chr) to a 
+# factor
+lw$sex <- as.factor(lw$sex)
+
+str(lw) 
+# observe how it is now a factor (Factor), and the number of levels are 
+# indicated
+
+```
+
+
+We'll change contemporary group and eye colour to factors too, and ID to characters.
+
+```{r}
+
+# Changing contemporary group and eye colour to factors
+lw$contemporary_group <- as.factor(lw$contemporary_group)
+lw$eye_colour <- as.factor(lw$eye_colour)
+
+# Changing ID to characters
+lw$id <- as.character(lw$id)
+
+str(lw)
+
+```
+
+
+Depending on the data set, we could get more than one record per animal.  We can check this by looking at the number of unique IDs, and comparing that to the number of rows in our data set.
+
+```{r}
+
+length(unique(lw$id))/nrow(lw)
+
+```
+
+We have just one record for every animal in this data set.
+
+
+Let's summarise our factors (number of records in each level):
+
+```{r}
+
+summary(lw$sex)
+summary(lw$contemporary_group)
+summary(lw$eye_colour)
+
+```
+
+
+And summarise our three continuous variables:
+
+```{r}
+
+summary(lw$live_weight)
+summary(lw$growth_rate)
+summary(lw$fat_percentage)
+
+```
+Notice how the type of information summarised is different depending on the data type.  Factors were summarised with counts per level, while our other traits were summarised with mean, median, minimum, maximum, etc.
+
+
+Another helpful way to explore data is to plot it.
+
+```{r}
+
+# Using a histogram, we can see the distribution of traits
+hist(lw$live_weight, 
+     main='Live weights (kg) of pigs',
+     xlab='Live weight (kg)',
+     col='#810262', 
+     border='white')
+hist(lw$growth_rate,
+     main='Growth rates (kg/day) of pigs',
+     xlab='Growth rate (kg/day)',
+     col='#457E81', 
+     border='white')
+hist(lw$fat_percentage,
+     main='Fat proportion of pig carcasses',
+     xlab='Fat proportion',
+     col='#AC0040', 
+     border='white')
+
+```
+
+In this data set, the continuous variables all have normal/Gaussian distributions.
+
+
+For this exercise, we are interested in pig live weight and the effects that explain it.  We can use the additional information provided in our models to make inferences about live weight (interpolate and extrapolate).
+
+For example, sex may have an effect on live weight (we've seen this in literature where boars are heavier than sows).  We can use information on sex in a linear model to estimate its contribution to live weight.  First, let's visualise live weights by sex.
+
+```{r}
+
+boxplot(live_weight~sex, # boxplot(y~x)
+        data=lw, # data frame
+        main='Live weight of pigs by sex',
+        xlab='Sex (female (F) and male (M)',
+        ylab='Live weight (kg)',
+        col=c('#F4AA00','#0091B5'),
+        pch=19) # changes what the points that are plotted look like
+
+```
+
+Visually we can see that males are, on average, heavier than females.  Using a linear model we can show whether this is a significant difference or not.  Similarly to the boxplot() function, we will use lm() to write and test our model.  To view the output of our model, we use the "summary()" command.
+
+```{r}
+
+# In model1, we have our response variable (live weight) and one fixed effect (sex)
+model1 <- lm(live_weight~sex,
+             data=lw) 
+
+# To see results, use the "summary()" command
+summary(model1)
+
+```
+
+Here's how to interpret the summary of our linear model:
+
+## Call:
+
+This is the model, with our response variable (live_weight), a '~' is used where we would usually write '=' (when using pen and paper), then our fixed effect (sex).  The response variable and fixed effect have come from our data frame 'data' (lw).
+
+## Residuals:
+
+This is the summary of the distribution of the residuals from the regression model.  A residual is the difference between the observed and predicted value from the regression model.  The summary includes the minimum, median and maximum residual values.  We can directly access the residuals of a module using the command "resid()".
+
+```{r}
+
+# Histogram of residuals
+hist(resid(model1),
+     main='Model 1 (live_weight ~ sex) residuals',
+     xlab='Residuals',
+     col='#810262', 
+     border='white')
+
+```
+
+A normal distribution of residuals is one of the assumptions of a linear model.
+
+
+## Coefficients:
+
+These are the estimated coefficients of the regression model.
+
+
+For each effect:
+
+
+**Estimate** are the estimated coefficients, or the average increase in the response variable associated with one unit increase in the effect, assuming all other effects are held constant.
+
+We can use these values to interpolate/extrapolate.  
+
+live weight = 156.8101 + 19.2716sex
+
+'sex' is '0' if the animal is a female, and '1' if the animal is a male.  
+live weight = 156.8101 
+
+
+**Std. Error** are the standard errors of the estimates, and are the measure of uncertainty for the estimates.
+
+
+**t-value** are the t-statistics for the effects, and is the Estimate divided by the Std. Error.
+
+
+**P(>|t|)** are the p-values for the t-statistics.  If this value is less than the value determining significance (alpha, ex. alpha=0.05), then the effect is significant.
+
+Pr(>|t|) is < 2e-16 (less than our alpha=0.05), and therefore significant.  You'll notice there are 'Signif. codes' which suggest alpha values, and indicate with symbols whether effects are significant.  In this case, our p-value for the effect of sex is significant for even the smallest alpha.
+
+
+## Model fit
+
+
+**Residual standard error** is the average distance observed values fall from the regression line.  The smaller the value, the better the regression model fits the data.
+
+
+**Degrees of freedom** is the total observations for the response variable minus the number of effects minus 1.
+
+In our model, the degrees of freedom are: 2535 live weight observations minus 1 effect (sex) minus 1 is equal to 2533 degrees of freedom.
+
+
+**Multiple R squared** is the coefficient of determination, and is the proportion of the variance in the response variable explained by the effects.  This value ranges from 0 to 1, and the closer to 1, the better the effects in the model can predict the response variable.
+
+In our model, 0.4634 of the variance in live weight is explained by sex.
+
+
+**Adjusted R squared** is adjusted for the number of effects in the model (this value will be less than the Multiple R squared).  Use this value to compare the fit of different regression models that use a different number of effects.
+
+
+**F-statistic** shows whether the model provides a better fit to the data than a model with no effects.
+
+
+**p-value** is for the F-statistic, and if it is lower than the significance level, then the model fits the data better than a model with no effects.
+
+Our p-value for this model is <2.2e-16, smaller than our alpha=0.05, and therefore, this model including the effect of sex, is better than not including the effect of sex.
+
+
+Similar to a discrete variable, we can visualise any relationship with a continuous variable with our response variable by plotting both together.
+
+```{r}
+
+plot(lw$growth_rate, lw$live_weight,
+     main='Growth rate (kg/day) and live weight (kg) of pigs',
+     xlab='Growth rate (kg/day)',
+     ylab='Live weight (kg)',
+     pch=19)
+
+```
+
+From the plot above, we can see a positive correlation between growth rate and live weight: animals with a higher growth rate, have a higher live weight.
+
+Including a covariate in a linear model with the lm() function is done in the same way as adding an effect that is a discrete variable.
+
+```{r}
+
+model2 <- lm(live_weight~growth_rate,
+             data=lw) # in this model, we have our response variable and one covariate
+
+summary(model2)
+
+```
+
+In this model, live weight increases by 72.195 for every 1 unit change in growth rate.  This effect is significant (see the p-value for this effect which is <0.05).  And our multiple R squared value shows that growth rate explains 0.3689 of the variance in live weight.
+
+
+```{r}
+
+plot(lw$growth_rate, lw$live_weight,
+     main='Pig growth rate (kg/day) and live weight (kg)',
+     xlab='Growth rate (kg/day)',
+     ylab='Live weight (kg)',
+     pch=19)
+tmp <- tapply(X=lw$live_weight, INDEX=lw$growth_rate, FUN=mean)
+points(tmp ~ names(tmp), pch=19, col='red') # plotting means
+abline(coef(model2), col='red', lwd=2) # plotting linear regression
+
+```
+
+
+We can put multiple effects into a model.  Now we will add all the possible fixed effects from our data set.  It doesn't make biological sense to add eye colour to our linear regression for live weight, but let's see what it looks like, and how we can interpret the output from R.
+
+```{r}
+
+model3 <- lm(live_weight ~ sex + eye_colour + growth_rate,
+             data=lw)
+
+summary(model3)
+
+# Or, we can use glm() function.  In our case, we have assumed a normal 
+# distribution, but with glm() you can also look at traits with other 
+# distributions
+
+model4 <- glm(live_weight ~ sex + eye_colour + growth_rate, 
+              data=lw,
+              family=gaussian) # use "family=" to indicate the correct distribution
+
+summary(model4)
+
+```
+Notice that the p-values for the effects of medium_brown, pale_brown, and pale_grey eyes are all > than our chosen alpha of 0.05 (they are 0.147, 0.438, and 0.907), with small estimates and large standard errors.  Therefore, eye colour does not have a significant effect on live weight in pigs.
+
+Comparing the "lm()" and "glm()" results, you can see the call and coefficients sections are the same, but with these differences in "glm()":
+
+* Null deviance (how well the response variable can be predicted by a model with only an intercept term)
+* Residual deviance (how well the response variable can be predicted by the model, the lower the number, the better the fit)
+* Akaike information criterion (AIC, a metric used to compare the fit of different models, the lower the value, the better the fit)
+
+
+# Mixed model equations
+
+We are also interested in mixed models (models that have both fixed and random effects).  Some popular packages that implement both types of effects are "nlme", and "lme4".  Like "glm()", "lme4" can accommodate generalised linear models.
+
+Contemporary group is often treated as a random effect because inference will be made to an entire population of conceptual levels of contemporary group.
+
+```{r}
+
+# Install "lme4" package
+# Un-comment and run the line below to install
+#install.packages('lme4')
+
+library(lme4)
+
+# random effects are added to the model by including (1|RandomEffect)
+model5 <- lmer(lw$live_weight ~ lw$sex + lw$growth_rate + (1|lw$contemporary_group))
+
+summary(model5)
+
+```
+
+
+Let's compare the effect of contemporary group when it is treated as a fixed or random effect.
+
+```{r}
+
+# Contemporary group as a random effect
+random_effect <- lmer(lw$live_weight ~ lw$sex + lw$growth_rate + (1|lw$contemporary_group))
+
+# Contemporary group as a fixed effect
+fixed_effect <- lm(lw$live_weight ~ lw$sex + lw$growth_rate + lw$contemporary_group)
+
+# Fixed effects
+coefFix <- coef(fixed_effect)
+sel <- grep(pattern = "contemporary_group", x = names(coefFix))
+litterFix <- c(0, coefFix[sel]) #  0 for 1st contemporary group
+
+# Random effects
+litterRan <- ranef(random_effect)$`lw$contemporary_group`[, "(Intercept)"]
+
+plot(litterRan ~ litterFix, 
+     main='Estimated effects of contemporary group as a fixed or random effect',
+     xlab='Fixed effect',
+     ylab='Random effect',
+     ylim = c(-20, 20),
+     pch=19)
+abline(a = 0, b = 1, lty = 2)
+
+```
+
+We see similar estimates for contemporary group as a fixed or random effect.  However, treating a random effect as fixed effect can result in biased estimates.
+
+
+# Solving linear models in matrix format
+
+Alternatively, we can use matrix algebra to estimate effects.  In this first example, we are only including and estimating fixed effects in our model.
+
+```{r}
+
+# Construct the X matrix - fixed effects
+mean <- matrix(rep(1, nrow(lw)),nrow=nrow(lw),ncol=1) # allows intercept estimate
+sex <- matrix(ifelse(lw$sex == "F", 0, 1), ncol = 1)
+gr <- as.matrix(lw$growth_rate)
+X <- cbind(mean,sex,gr)
+
+# Construct the y matrix - response variable
+y <- as.matrix(lw$live_weight)
+
+# Left hand side (LHS)
+XtX <- t(X) %*% X
+LHS <- XtX
+
+# Right hand side (RHS)
+Xty <- t(X) %*% y
+RHS <- Xty
+
+# Solving to estimate the effects
+solve(LHS, RHS)
+
+```
+Comparing these results to the "lm()" function, we can see our estimates are the same!
+
+Now let's solve our mixed model equation using matrix algebra.
+
+```{r}
+
+# Construct the X matrix - fixed effects
+mean <- matrix(rep(1, nrow(lw)),nrow=nrow(lw),ncol=1)
+sex <- matrix(ifelse(lw$sex == "F", 0, 1), ncol = 1)
+gr <- as.matrix(lw$growth_rate)
+X <- cbind(mean,sex,gr)
+X
+
+# Construct the Z matrix - random effects
+cg <- unname(model.matrix(~contemporary_group - 1, data = lw))
+Z <- cg
+
+# Construct the y matrix - response variable
+y <- as.matrix(lw$live_weight)
+
+# LHS
+XtX <- t(X) %*% X
+XtZ <- t(X) %*% Z
+ZtX <- t(Z) %*% X
+sigma_e2 <- 9.2
+sigma_cg2 <- 6.4
+I <- diag(ncol(cg))
+ZtZ <- t(Z) %*% Z + I * sigma_e2/sigma_cg2
+LHS <- rbind(cbind(XtX, XtZ),
+             cbind(ZtX, ZtZ))
+
+# RHS
+Xty <- t(X) %*% y
+Zty <- t(Z) %*% y
+RHS <- rbind(Xty, Zty)
+
+# Solving to estimate the effects
+solve(LHS, RHS)
+
+```
+Hint: use "dim()" to check dimensions of matrices as you go.  Often errors when making the LHS and RHS of the equation are due to making matrices with incorrect dimensions.
+
+
+# Learning objectives
+
+In this lecture we have covered:
+
+* Linear models
+    + Fixed effects
+    + Fixed and random effects
+* Matrix format
+
+
+Use the Rmarkdown document and the simulated data to try these analyses yourself!

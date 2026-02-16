@@ -1,0 +1,76 @@
+#IID StageLac parity par agroecol Location GBCG GBCG1 breed htm htd td hss hcs hytd hycs hyss SCS SCC
+#
+#balckface_sheep-ssGBLUP
+#1	 2	 3	4	5        6	 7	 8	9	10	11	12	13	     14	               15	16	  17		   18
+#id	sex	Year	dob	litter	LS	DamAge	Group	Line_a	PC1	PC2	PC3	LW	bon_area_ISC	mus_density_TV8	rlw	rbon_area	rmus_den
+#
+#LW ~ mu DamAge Year Group  sex  LS  dob PC1 PC2 PC3 !r id 
+#-input files cannot contain character
+DATAFILE 
+CT724.txt # data file name
+TRAITS ##trait LW:─ positions of traits in data file  
+13
+FIELDS_PASSED TO OUTPUT #positions that are not renumbered; put empty line if not needed.
+  
+WEIGHT(S) # position of weight - fraction to the residual variance; put empty line if not needed
+
+RESIDUAL_VARIANCE # matrix of residual (co)variances
+10.0
+EFFECT  #sex
+2 cross alpha
+EFFECT #position of this effect for each trait; e.g. Year
+3 cross alpha
+EFFECT #position of this effect for each trait; e.g. Litter size
+6 cross alpha   
+EFFECT #position of this effect for each trait; e.g. damAge
+7 cross alpha
+EFFECT #position of this effect for each trait; e.g. mgntGroup
+8 cross alpha
+EFFECT #position of this effect for each trait; e.g. Line
+9 cross alph
+EFFECT #dob
+4 cov 
+EFFECT #PC1
+10 cov
+EFFECT #PC2
+11 cov
+EFFECT #PC3
+12 cov
+
+EFFECT 
+1 cross alpha
+RANDOM # treated as a random effect-'diagonal', 'sire' or 'animal' 
+animal
+#OPTIONAL
+#pe
+FILE
+newped.txt
+FILE_POS #positions of animal, sire, dam, alternate dam (recipient dam), and year of birth in pedigree file (default 1 2 3 0 0)
+1 2 3 0 0 0     
+SNP_FILE  # SNP marker file
+snpblup3.txt #snpblup3.txt
+PED_DEPTH  
+5  # depth of pedigree search (default 3); all pedigrees are loaded if p = 0.
+(CO)VARIANCES 
+0.1  # (co)variances for animal effects or animal + maternal effects
+#(CO)VARIANCES_PE 
+#0.1   # (co)variances for the PE effect
+OPTION missing -99999
+#OPTION use_yams 
+#OPTION alpha_size 40
+#OPTION max_string_readline 800
+#OPTION maxrounds 2048
+#OPTION saveGInverse #
+#OPTION saveA22Inverse
+#OPTION no_basic_statistics
+#OPTION weightedG W42446 
+#OPTION snp_p_value
+#OPTION  map_file MAP_GWAS1.txt # map files
+#OPTION Manhattan_plot_R	
+#OPTION windows_variance 20     
+#OPTION origID
+#OPTION method VCE
+OPTION no_quality_control
+#OPTION thrWarnCorAG 0
+#OPTION thrStopCorAG 0
+#OPTION  thrCorAG 0.02
