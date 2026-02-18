@@ -1,0 +1,45 @@
+# parameter file for renumf90
+DATAFILE
+sheep.dat
+TRAITS
+10           # trait of interest: LW
+FIELDS_PASSED TO OUTPUT
+
+WEIGHT(S)
+
+RESIDUAL_VARIANCE
+10.0
+EFFECT
+2 cross alpha # data @ col 2: sex
+EFFECT
+3 cross alpha # data @ col 3: Year
+EFFECT
+6 cross alpha # data @ col 5: Litter size
+EFFECT
+7 cross alpha # data @ col 7: dam age
+EFFECT
+8 cross alpha # data @ col 8: Group
+EFFECT
+9 cross alpha  # data @ col 9: Line
+EFFECT
+4 cov          # data @ col 4: day of birth
+EFFECT
+5  cross alpha # data @ col 5: litter
+RANDOM
+diagonal  # random independent
+EFFECT
+1 cross alpha
+RANDOM
+animal
+OPTIONAL
+
+FILE
+newped.txt # name of pedigree file
+PED_DEPTH
+0  # how far on pedigree to look: 0 = all
+INBREEDING
+pedigree
+(CO)VARIANCES
+0.1
+OPTION use_yams
+OPTION origID
