@@ -1,0 +1,46 @@
+# parameter file for renumf90
+DATAFILE
+ sheep.dat
+TRAITS
+ 10      # trait of interest (LW)
+FIELDS_PASSED TO OUTPUT
+ 
+WEIGHT(S)
+ 
+RESIDUAL_VARIANCE
+ 10.0
+EFFECT
+ 2 cross alpha # data @ col 2: sex
+EFFECT
+3 cross alpha # data @ col 3: year
+EFFECT
+6 cross alpha # data @ col 6: LS (Litter size)
+EFFECT
+7 cross alpha # data @ col 7: dam age
+EFFECT 
+8 cross alpha # data @ col 8: group
+EFFECT 
+9 cross alpha # data @ col 9: Line
+EFFECT 
+4 cov # data @ col 4: DOB (Day of birth)
+EFFECT
+5 cross alpha # data @ col 5: Litter
+RANDOM 
+diagonal # Random independent
+EFFECT
+1 cross alpha # data @ col 1:id (animal) 
+RANDOM
+animal
+OPTIONAL
+ 
+SNP_FILE
+snpblup3.txt
+(CO)VARIANCES
+0.1
+OPTION use_yams
+OPTION origID
+OPTION method VCE # Variance components estimation
+OPTION AlphaBeta 0.99 0.01
+OPTION tunedG 0
+OPTION msg 1
+
