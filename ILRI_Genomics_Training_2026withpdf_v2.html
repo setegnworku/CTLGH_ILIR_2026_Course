@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genetic & Genomic Approaches for Livestock Improvement | ILRI 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary-gold: #D4A853;
+            --primary-dark: #1A1A2E;
+            --accent-terracotta: #C75B39;
+            --accent-teal: #2D6A6A;
+            --text-light: #F5F5F0;
+            --text-muted: #A0A0A0;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(212, 168, 83, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        
+        header {
+            padding: 1.5rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(212, 168, 83, 0.1);
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 1rem; }
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-terracotta));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700; font-size: 1.3rem;
+            color: var(--primary-dark);
+        }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--primary-gold); }
+        nav ul { display: flex; gap: 2rem; list-style: none; }
+        nav a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+        nav a:hover { color: var(--primary-gold); }
+
+        .hero { padding: 140px 0 80px; text-align: center; }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(212, 168, 83, 0.1);
+            border: 1px solid rgba(212, 168, 83, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--primary-gold);
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; margin-bottom: 1rem; }
+        .hero h1 span { color: var(--primary-gold); }
+        .hero-info { display: flex; justify-content: center; gap: 3rem; margin-top: 2rem; flex-wrap: wrap; }
+        .hero-info-item { text-align: center; }
+        .hero-info-item strong { color: var(--primary-gold); display: block; font-size: 1.1rem; }
+        .hero-info-item span { color: var(--text-muted); font-size: 0.9rem; }
+
+        .section { padding: 5rem 0; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: 2rem; text-align: center; margin-bottom: 3rem; }
+        .section-title span { color: var(--primary-gold); }
+
+        .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .mission-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+        }
+        .mission-card h3 { color: var(--primary-gold); margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .mission-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .day-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .day-header {
+            background: rgba(212, 168, 83, 0.1);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .day-number {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-terracotta));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem; font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .day-title h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+        .day-title span { color: var(--text-muted); font-size: 0.9rem; }
+        .day-content { padding: 2rem; }
+
+        .material-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .material-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .material-section h4 {
+            color: var(--primary-gold);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .material-list { list-style: none; }
+        .material-list li {
+            padding: 0.8rem 1rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .material-list li:hover { background: rgba(255,255,255,0.04); }
+        .material-info { display: flex; align-items: center; gap: 0.8rem; }
+        .material-icon {
+            width: 35px; height: 35px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .material-icon.pdf { background: #E74C3C; color: white; }
+        .material-icon.ppt { background: #E67E22; color: white; }
+        .material-icon.r { background: #3498DB; color: white; }
+        .material-icon.data { background: #2ECC71; color: white; }
+        .material-icon.zip { background: #9B59B6; color: white; }
+        .material-icon.doc { background: #3498DB; color: white; }
+        .material-name { font-size: 0.95rem; }
+        .material-name span { color: var(--text-muted); font-size: 0.8rem; display: block; }
+        
+        .download-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(212, 168, 83, 0.1);
+            border: 1px solid rgba(212, 168, 83, 0.3);
+            border-radius: 6px;
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .download-btn:hover { background: rgba(212, 168, 83, 0.2); }
+        
+        .coming-soon {
+            padding: 0.4rem 0.8rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .faculty-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .faculty-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+        .faculty-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .faculty-avatar {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-terracotta));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .faculty-name { font-weight: 600; }
+        .faculty-title { color: var(--primary-gold); font-size: 0.85rem; }
+        .faculty-affiliation { color: var(--text-muted); font-size: 0.85rem; }
+
+        .participants-table {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .participants-table table { width: 100%; border-collapse: collapse; }
+        .participants-table th {
+            background: rgba(212, 168, 83, 0.1);
+            padding: 1rem;
+            text-align: left;
+            color: var(--primary-gold);
+            font-size: 0.9rem;
+        }
+        .participants-table td { padding: 0.8rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.9rem; }
+        .participants-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        .developer-card {
+            background: linear-gradient(135deg, rgba(212, 168, 83, 0.08), rgba(199, 91, 57, 0.05));
+            border: 1px solid rgba(212, 168, 83, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        .developer-avatar {
+            width: 100px; height: 100px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-terracotta));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem; font-weight: 700;
+            color: var(--primary-dark);
+            flex-shrink: 0;
+        }
+        .developer-info h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.3rem; }
+        .developer-info h4 { color: var(--primary-gold); font-size: 1rem; margin-bottom: 1rem; font-weight: 600; }
+        .developer-info p { color: var(--text-muted); }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        footer a { color: var(--primary-gold); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .mission-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2rem; }
+            nav ul { gap: 1rem; flex-wrap: wrap; justify-content: center; }
+            .developer-card { flex-direction: column; text-align: center; }
+            .header-content { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">G2</div>
+                <div class="logo-text">ILRI Genomics Training 2026</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#materials">Course Materials</a></li>
+                    <li><a href="#faculty">Faculty</a></li>
+                    <li><a href="#participants">Participants</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge">Open Access | Transparent | For Africa</div>
+        <h1>Genetic & Genomic Approaches for <span>Livestock Improvement</span></h1>
+        <div class="hero-info">
+            <div class="hero-info-item">
+                <strong>16 - 21 February 2026</strong>
+                <span>6-Day Programme</span>
+            </div>
+            <div class="hero-info-item">
+                <strong>ILRI Campus, Nairobi</strong>
+                <span>Kenya</span>
+            </div>
+            <div class="hero-info-item">
+                <strong>20+ Participants</strong>
+                <span>12+ Countries</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="about">
+    <div class="container">
+        <h2 class="section-title">Our <span>Mission</span></h2>
+        <div class="mission-grid">
+            <div class="mission-card">
+                <h3>Open Access</h3>
+                <p>All course materials freely accessible to scientists and students across Africa</p>
+            </div>
+            <div class="mission-card">
+                <h3>Transparency</h3>
+                <p>Complete curriculum and teaching resources documented and shared openly</p>
+            </div>
+            <div class="mission-card">
+                <h3>Capacity Building</h3>
+                <p>Training the next generation of livestock geneticists for Africa</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="materials">
+    <div class="container">
+        <h2 class="section-title">Course <span>Materials</span></h2>
+
+        <!-- ===================== PRE-COURSE ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number" style="font-size: 1rem;">Pre</div>
+                <div class="day-title">
+                    <h3>Arrivals &amp; Software Setup</h3>
+                    <span>Saturday 14th &ndash; Sunday 15th February 2026</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>📋 Schedule</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background: #666; color: white; font-size: 0.7rem;">SAT</div>
+                                <div class="material-name">Sat 14th / Sun 15th Feb<span>Participant arrivals</span></div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background: #666; color: white; font-size: 0.7rem;">SUN</div>
+                                <div class="material-name">12:30 &ndash; Group lunch at ILRI<span>13:30 &ndash; 16:30 Software installation &amp; testing</span></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DAY 1 ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">1</div>
+                <div class="day-title">
+                    <h3>Phenomics & R Programming Fundamentals</h3>
+                    <span>Monday, 16th February 2026 | Lead: Dr. Isidore Houaga</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>📚 Lectures</h4>
+                    <ul class="material-list">
+                        <!-- TO ACTIVATE: Replace <span class="coming-soon">Coming Soon</span> with <a href="materials/day1/FILENAME.pdf" class="download-btn">Download</a> -->
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Livestock Phenomics<span>Prof. Mizeck Chagunda</span></div>
+                            </div>
+                            <a href="materials/day1/Capacity Building 2026 Phenomics.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">From Data to Smarter Farm Decisions<span>Dr. Chinyere Ekine</span></div>
+                            </div>
+                            <a href="materials/day1/from data to smarter farm decisions.pdf" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>💻 Exercises</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">Rmd</div>
+                                <div class="material-name">Introduction to R<span>Dr. Isidore Houaga, Dr. Setegn Worku Alemu, Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day1/1_IntroductiontoR.Rmd" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">Milk Data (Practice Dataset)<span>Practice data</span></div>
+                            </div>
+                            <a href="materials/day1/milkdata.txt" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>✅ Solutions</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">Yield Plot (R Solution)<span>Dr. Chinyere Ekine</span></div>
+                            </div>
+                            <a href="materials/day1/yieldplot.R" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DAY 2 ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">2</div>
+                <div class="day-title">
+                    <h3>Phenotypic Variation & Linear Models</h3>
+                    <span>Tuesday, 17th February 2026 | Lead: Dr. Chrissy Rochus</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>🌅 Morning</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Day 2 Morning Lecture<span>Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day2/morning/Day_2_morning.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Gregor, Genomes and Phenotypes (Reading)<span>Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day2/morning/Gregor_Genomes_and_Phenotypes_reading.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">Rmd</div>
+                                <div class="material-name">Allele Dosages &amp; Genotypes<span>Dr. Chrissy Rochus, Dr. Isidore Houaga, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <a href="materials/day2/morning/AlleleDosagesGenotypes.Rmd" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>🌆 Afternoon</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Day 2 Afternoon Lecture<span>Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day2/afternoon/Day_2_afternoon.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Data Analysis Using Regression (Reading)<span>Gelman &amp; Hill</span></div>
+                            </div>
+                            <a href="materials/day2/afternoon/Gelman_Hill_Data_Analysis_Using_Regression_and_Multilevel_Hierarchical_Models_2006.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">Rmd</div>
+                                <div class="material-name">Matrix Algebra<span>Dr. Chrissy Rochus, Dr. Isidore Houaga, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <a href="materials/day2/afternoon/MatrixAlgebra.Rmd" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">Rmd</div>
+                                <div class="material-name">Linear Models<span>Dr. Chrissy Rochus, Dr. Isidore Houaga, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <a href="materials/day2/afternoon/LinearModels.Rmd" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">Linear Models - Sheep Example<span>Dr. Chrissy Rochus, Dr. Isidore Houaga, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <a href="materials/day2/afternoon/LinearModels_SheepExample.R" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DAY 3 ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">3</div>
+                <div class="day-title">
+                    <h3>Pedigree-Based Genetic Evaluations</h3>
+                    <span>Wednesday, 18th February 2026 | Lead: Prof. Raphael Mrode</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>📚 Lectures</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Day 3 Lecture - Part 1<span>Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day3/Day_3_part1.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Day 3 Lecture - Part 2<span>Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day3/Day_3_part2.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Estimating Breeding Values - BLUPF90<span>Dr. Isidore Houaga</span></div>
+                            </div>
+                            <a href="materials/day3/estimating_bv_blupf90_IH_2026.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon ppt">PPT</div>
+                                <div class="material-name">Estimating BV with BLUPF90 (Slides)<span>Dr. Isidore Houaga</span></div>
+                            </div>
+                            <a href="materials/day3/Day_3_Wed_18th_February_2026/estimating_bv_blupf90.pptx" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>💻 Exercises</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">Rmd</div>
+                                <div class="material-name">Pedigree-Based Model - Tiny Example<span>Dr. Chrissy Rochus, Dr. Chinyere Ekine, Dr. Isidore Houaga, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <a href="materials/day3/Pedigree-based_model_tiny_example.Rmd" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">Prepare Data for BLUPF90<span>Dr. Isidore Houaga</span></div>
+                            </div>
+                            <a href="materials/day3/Day_3_Wed_18th_February_2026/prepBLUPF90.R" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Cheatsheet - Linux Terminal<span>Reference</span></div>
+                            </div>
+                            <a href="materials/day3/Day_3_Wed_18th_February_2026/Cheatsheet_for_Linux_terminal.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Cheatsheet - Windows Command Prompt<span>Reference</span></div>
+                            </div>
+                            <a href="materials/day3/Day_3_Wed_18th_February_2026/Cheatsheet_for_Windows_command_prompt.pdf" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>🖥️ BLUPF90 Software &amp; Data</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">EXE</div>
+                                <div class="material-name">blupf90+.exe<span>BLUPF90+ software</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/blupf90+.exe" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">EXE</div>
+                                <div class="material-name">remlf90.exe<span>REML estimation</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/remlf90.exe" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">EXE</div>
+                                <div class="material-name">airemlf90.exe<span>AI-REML estimation</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/airemlf90.exe" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">EXE</div>
+                                <div class="material-name">renumf90.exe<span>Data renumbering</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/renumf90.exe" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#555;color:#fff;font-size:0.7rem;">DLL</div>
+                                <div class="material-name">libiomp5md.dll<span>Required library</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/libiomp5md.dll" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">PAR</div>
+                                <div class="material-name">blupf901.par<span>Parameter file</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/blupf901.par" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">DAT</div>
+                                <div class="material-name">sheep.dat<span>Sheep dataset</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/sheep.dat" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">newped.txt<span>Pedigree data</span></div>
+                            </div>
+                            <a href="materials/day3/Blupf90-18Feb2026/newped.txt" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DAY 4 ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">4</div>
+                <div class="day-title">
+                    <h3>Genomic Data & GWAS</h3>
+                    <span>Thursday, 19th February 2026 | Lead: Dr. Getinet Tarekegn | Dinner: Ankole Restaurant, Nairobi</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>📚 Lectures</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Genomic Data Management<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/GenomicData_mgmt.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">ssGWAS<span>Dr. Getinet Tarekegn et al.</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_Tarekegn_etal.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Introduction to GWAS<span>Dr. Oswald Matika & Dr. Chrissy Rochus</span></div>
+                            </div>
+                            <a href="materials/day4/GWAS_introduction_2026_submitted.pdf" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>💻 Exercises</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">Data Filtering in R<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/DataFiltering.R" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">PCA in R<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/PCA_in_R.R" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon doc">TXT</div>
+                                <div class="material-name">PLINK Practical Commands<span>Dr. Getinet Tarekegn, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">GWAS Practical<span>Dr. Isidore Houaga, Dr. Getinet Tarekegn, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>📊 ssGWAS Exercise Data</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">CT724 Data<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_materials/CT724.txt" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">GWAS Map<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_materials/gwasmap.txt" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">Pedigree Data (newped)<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_materials/newped.txt" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">PAR</div>
+                                <div class="material-name">RENUMF90 Parameter File<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_materials/renum.par" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">SNP-BLUP Data<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_materials/snpblup3.txt" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">TXT</div>
+                                <div class="material-name">Weight/Trait Data<span>Dr. Getinet Tarekegn</span></div>
+                            </div>
+                            <a href="materials/day4/ssGWAS_materials/wt.txt" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>📁 PLINK Exercise Data</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">BED</div>
+                                <div class="material-name">Sheep05_724.bed<span>PLINK binary genotype data (Sheep dataset)</span></div>
+                            </div>
+                            <a href="materials/day4/Sheep05_724.bed" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">BIM</div>
+                                <div class="material-name">Sheep05_724.bim<span>PLINK extended map file (SNP information)</span></div>
+                            </div>
+                            <a href="materials/day4/Sheep05_724.bim" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon" style="background:#333;color:#fff;font-size:0.7rem;">FAM</div>
+                                <div class="material-name">Sheep05_724.fam<span>PLINK pedigree &amp; phenotype file</span></div>
+                            </div>
+                            <a href="materials/day4/Sheep05_724.fam" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DAY 5 ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">5</div>
+                <div class="day-title">
+                    <h3>AABNet Book Launch</h3>
+                    <span>Friday, 20th February 2026 | Special Event at ILRI Campus</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>📚 Event Materials</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">AABNet Book Launch Programme<span>Event schedule</span></div>
+                            </div>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DAY 6 ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">6</div>
+                <div class="day-title">
+                    <h3>Genomic BLUP & Breeding Programmes</h3>
+                    <span>Saturday, 21st February 2026 | Lead: Prof. Raphael Mrode</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>📚 Lectures</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Genome-Based Genetic Evaluations<span>SNP-BLUP, G-BLUP, ssGBLUP | Prof. Raphael Mrode</span></div>
+                            </div>
+                            <a href="materials/day6/Genomic-based Predictions-Feb2026.pdf" class="download-btn">Download</a>
+                        </li>
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Breeding Programmes for the Global South<span>Dr. Getinet Tarekegn &amp; Prof. Raphael Mrode</span></div>
+                            </div>
+                            <a href="materials/day6/GenomicData_mgmt.pdf" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>💻 Exercises</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon data">PAR</div>
+                                <div class="material-name">Genomic BLUP Practical (RENUMF90 Parameter File)<span>Prof. Raphael Mrode, Dr. Chrissy Rochus, Dr. Isidore Houaga, Dr. Setegn Worku Alemu</span></div>
+                            </div>
+                            <a href="materials/day6/gbluprenum.par" class="download-btn">Download</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>✅ Solutions</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon r">R</div>
+                                <div class="material-name">Day 6 Solutions - GBLUP<span>Complete genomic evaluation solutions</span></div>
+                            </div>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== ADDITIONAL RESOURCES ===================== -->
+        <div class="day-card">
+            <div class="day-header">
+                <div class="day-number">+</div>
+                <div class="day-title">
+                    <h3>Additional Resources</h3>
+                    <span>Software, Datasets & Reference Materials</span>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="material-section">
+                    <h4>🔧 Software & Installation</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon pdf">PDF</div>
+                                <div class="material-name">Software Installation Guide<span>R, RStudio, PLINK, required packages</span></div>
+                            </div>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="material-section">
+                    <h4>📊 Complete Datasets</h4>
+                    <ul class="material-list">
+                        <li>
+                            <div class="material-info">
+                                <div class="material-icon zip">ZIP</div>
+                                <div class="material-name">All Course Datasets<span>Complete data package for all practicals</span></div>
+                            </div>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section class="section" id="faculty">
+    <div class="container">
+        <h2 class="section-title">Course <span>Faculty</span></h2>
+        <div class="faculty-grid">
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">MC</div>
+                    <div><div class="faculty-name">Prof. Mizeck Chagunda</div><div class="faculty-title">Professor</div></div>
+                </div>
+                <div class="faculty-affiliation">Centre for Tropical Livestock Genetics and Health, The Roslin Institute, University of Edinburgh, UK</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Quantitative genetics and genomics, livestock methane emissions and climate resilience traits.</div>
+                <a href="https://edwebprofiles.ed.ac.uk/profile/mizeck-chagunda" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">RM</div>
+                    <div><div class="faculty-name">Prof. Raphael Mrode</div><div class="faculty-title">Professor</div></div>
+                </div>
+                <div class="faculty-affiliation">Scotland Rural College, Edinburgh, UK &amp; ILRI, Nairobi, Kenya</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Quantitative genetics and genomics, breeding programme design and optimisation, innovative genomic approaches for genetic improvement in low-input environments.</div>
+                <a href="https://www.ilri.org/people/raphael-mrode" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">IH</div>
+                    <div><div class="faculty-name">Dr. Isidore Houaga</div><div class="faculty-title">Scientist - Statistical Geneticist</div></div>
+                </div>
+                <div class="faculty-affiliation">International Livestock Research Institute (ILRI), Nairobi, Kenya</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Quantitative genetics and genomics, phenomics, statistical modelling, breeding programme design, AI and machine learning applied to livestock climate resilience traits.</div>
+                <a href="https://www.linkedin.com/in/dr-isidore-houaga-phd-264b6041" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">CR</div>
+                    <div><div class="faculty-name">Dr. Chrissy Rochus</div><div class="faculty-title">Core Scientist in Quantitative Genetics</div></div>
+                </div>
+                <div class="faculty-affiliation">The Roslin Institute, University of Edinburgh, UK</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Working with genomic data to study genetic diversity and adaptation in domestic species including sheep, chickens, pigs, turkeys, and dairy cattle.</div>
+                <a href="https://www.ed.ac.uk/profile/chrissy-rochus" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">OM</div>
+                    <div><div class="faculty-name">Dr. Oswald Matika (Ozzie)</div><div class="faculty-title">Core Scientist - Genetics and Genomics</div></div>
+                </div>
+                <div class="faculty-affiliation">The Roslin Institute, University of Edinburgh, UK</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Quantitative Trait Loci, Linkage Analysis, Quantitative Genetics, Marker Assisted Selection, Genomic Selection and Bioinformatics.</div>
+                <a href="https://www.ed.ac.uk/profile/dr-oswald-matika" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">GT</div>
+                    <div><div class="faculty-name">Dr. Getinet Mekuriaw Tarekegn</div><div class="faculty-title">Scientist</div></div>
+                </div>
+                <div class="faculty-affiliation">Animal and Veterinary Sciences, Scotland's Rural College, Edinburgh, UK</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Livestock Genetics and Genomics, Bioinformatics.</div>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">CE</div>
+                    <div><div class="faculty-name">Dr. Chinyere Ekine-Dzivenu</div><div class="faculty-title">Scientist - Statistical Genetics and Genomics</div></div>
+                </div>
+                <div class="faculty-affiliation">International Livestock Research Institute (ILRI), Nairobi, Kenya</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Quantitative genetics and genomics, breeding for climate resilience and sustainability.</div>
+                <a href="https://www.ilri.org/people/chinyere-ekine-dzivenu" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+            <div class="faculty-card">
+                <div class="faculty-header">
+                    <div class="faculty-avatar">SA</div>
+                    <div><div class="faculty-name">Dr. Setegn W. Alemu</div><div class="faculty-title">Scientist - Statistical Genetics</div></div>
+                </div>
+                <div class="faculty-affiliation">International Livestock Research Institute (ILRI), Nairobi, Kenya</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong style="color: var(--text-light);">Interests:</strong> Genomic selection, quantitative genetics, methane emissions genetics, multi-omics integration (genome and microbiome), neural network GBLUP methods, livestock breeding in low-input systems.</div>
+                <a href="https://setegnworku.github.io/Personalwebpage/" target="_blank" style="color: var(--primary-gold); font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; display: inline-block;">View Profile &rarr;</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="participants">
+    <div class="container">
+        <h2 class="section-title">2026 <span>Participants</span></h2>
+
+        <div id="participant-map" style="height: 450px; border-radius: 15px; border: 1px solid var(--card-border); margin-bottom: 2rem; z-index: 1;"></div>
+        <div style="text-align: center; margin-bottom: 2.5rem; color: var(--text-muted); font-size: 0.9rem;">
+            <span style="display: inline-flex; align-items: center; gap: 0.4rem; margin-right: 1.5rem;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #2ecc71; display: inline-block;"></span> In-Person (21)</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.4rem; margin-right: 1.5rem;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3498db; display: inline-block;"></span> Online (30)</span>
+            <span style="display: inline-flex; align-items: center; gap: 0.4rem;"><span style="width: 14px; height: 14px; background: #D4A853; display: inline-block; transform: rotate(45deg); border-radius: 2px;"></span> Faculty (8)</span>
+        </div>
+
+        <h3 style="color: var(--primary-gold); margin-bottom: 1rem; font-size: 1.1rem;">In-Person Participants</h3>
+        <div class="participants-table" style="margin-bottom: 2.5rem;">
+            <table>
+                <thead><tr><th>Name</th><th>Country</th><th>Institution</th></tr></thead>
+                <tbody>
+                    <tr><td>Nantongo Ziwena</td><td>Uganda</td><td>NaLIRRI</td></tr>
+                    <tr><td>Kidus Nigussie Brook</td><td>Ethiopia</td><td>Addis Ababa University</td></tr>
+                    <tr><td>Narjice Chafai</td><td>Morocco</td><td>IAV Hassan II</td></tr>
+                    <tr><td>Isaac Malan</td><td>Namibia</td><td>Ministry of Agriculture, Fisheries, Water and Land Reform</td></tr>
+                    <tr><td>Andrias Madilindi</td><td>South Africa</td><td>ARC</td></tr>
+                    <tr><td>Thuli Tintswalo Siwele</td><td>South Africa</td><td>ARC</td></tr>
+                    <tr><td>Ngwenya Thabsile Mumcy</td><td>Eswatini</td><td>University of Eswatini</td></tr>
+                    <tr><td>Djoufack Tadakeng Yannick</td><td>Cameroon</td><td>Universit&eacute; de Ngaound&eacute;r&eacute;</td></tr>
+                    <tr><td>Bernard Ato Hagan</td><td>Ghana</td><td>University of Energy and Natural Resources</td></tr>
+                    <tr><td>Abdul Raman Sesay</td><td>Sierra Leone</td><td>Njala University</td></tr>
+                    <tr><td>Kwizera Adrien</td><td>Burundi</td><td>University of Burundi</td></tr>
+                    <tr><td>Hortuma Asefaw Habteslasie</td><td>Eritrea</td><td>Ministry of Agriculture / Egerton</td></tr>
+                    <tr><td>Kebba Nyabally</td><td>The Gambia</td><td>WALIC</td></tr>
+                    <tr><td>Shaikh Shabbiroddin Hasnoddin</td><td>India</td><td>BAIF</td></tr>
+                    <tr><td>Vincent Habimana</td><td>Rwanda</td><td>SUA</td></tr>
+                    <tr><td>Tafara Kundai Mavunga</td><td>Zimbabwe / Austria</td><td>IAEA</td></tr>
+                    <tr><td>Utlwanang Moreri</td><td>Botswana</td><td>NARDI</td></tr>
+                    <tr><td>Annie M. Houenou</td><td>Benin</td><td>UAC</td></tr>
+                    <tr><td>Opeyemi Adetola Oladejo</td><td>Nigeria</td><td>Bowen University</td></tr>
+                    <tr><td>Feizal Houssein Iye</td><td>Djibouti</td><td>Independent Consultant</td></tr>
+                    <tr><td>Catherine Ndung'u</td><td>Kenya</td><td>KALRO</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="color: var(--primary-gold); margin-bottom: 1rem; font-size: 1.1rem;">Online Participants</h3>
+        <div class="participants-table">
+            <table>
+                <thead><tr><th>Name</th><th>Country</th><th>Institution</th></tr></thead>
+                <tbody>
+                    <tr><td>Richard Dooso</td><td>Kenya</td><td>ILRI</td></tr>
+                    <tr><td>Geoffrey Beyihayo</td><td>Uganda</td><td>Gulu University</td></tr>
+                    <tr><td>Akshay Joshi</td><td>India</td><td>BAIF</td></tr>
+                    <tr><td>Calistro Gwatirisa</td><td>Zimbabwe</td><td>Ministry of Lands, Agriculture, Water Fisheries &amp; Rural Development</td></tr>
+                    <tr><td>Catherine Ndung'u</td><td>Kenya</td><td>KALRO</td></tr>
+                    <tr><td>Ziwena Nantongo</td><td>Uganda</td><td>NaLIRRI</td></tr>
+                    <tr><td>Sonia Agossadou</td><td>Benin</td><td>Datagenes-Africa</td></tr>
+                    <tr><td>Birhan Kassa</td><td>Ethiopia</td><td>Bahir Dar University</td></tr>
+                    <tr><td>Melchior Butoyi</td><td>Burundi</td><td>National Center of Artificial Insemination &amp; Genetic Improvement</td></tr>
+                    <tr><td>Oluwaseun Owonifaari</td><td>Nigeria</td><td>University of Ibadan</td></tr>
+                    <tr><td>Nirajan Bhattarai</td><td>Nepal</td><td>Agriculture &amp; Forestry University</td></tr>
+                    <tr><td>Genet Addisu</td><td>Ethiopia</td><td>Bio &amp; Emerging Technology Institute (BETin)</td></tr>
+                    <tr><td>Jean Claude Abijuru</td><td>Rwanda</td><td>RAB</td></tr>
+                    <tr><td>Samagya Kharel</td><td>Nepal</td><td>Himalayan College of Agricultural Sciences &amp; Technology</td></tr>
+                    <tr><td>Henry Mulindwa</td><td>Uganda</td><td>NARO, NaLIRRI</td></tr>
+                    <tr><td>Aderoju Adeyinka</td><td>Nigeria</td><td>National Biotechnology Development Agency</td></tr>
+                    <tr><td>Mohammed Aliy</td><td>Ethiopia</td><td>Jimma University College of Agriculture</td></tr>
+                    <tr><td>Ankita Gurao</td><td>India</td><td>ICAR-National Bureau of Animal Genetic Resources</td></tr>
+                    <tr><td>Patrick Baenyi</td><td>DRC</td><td>Evangelical University in Africa (UEA/South Kivu)</td></tr>
+                    <tr><td>Trudy Rashijane</td><td>South Africa</td><td>University of Limpopo</td></tr>
+                    <tr><td>Barani Somayeh</td><td>Iran</td><td>NABCPAP</td></tr>
+                    <tr><td>Mesfin Asaminew</td><td>Ethiopia</td><td>Arba Minch University</td></tr>
+                    <tr><td>Nurlgn Mohammed Hussen</td><td>Ethiopia</td><td>Wollo University</td></tr>
+                    <tr><td>Nyarko Nii Laryea Ahwa</td><td>Ghana</td><td>University of Ghana-Legon</td></tr>
+                    <tr><td>Mohammad Mahbubul</td><td>Bangladesh</td><td>Bangladesh Agricultural University</td></tr>
+                    <tr><td>Moazam Ali Khan</td><td>Pakistan</td><td>Buffalo Research Institute</td></tr>
+                    <tr><td>Samkelo Mlandvo Motsa</td><td>Eswatini / Taiwan</td><td>NCHU</td></tr>
+                    <tr><td>Mayoba Barbara Moono Gusiji</td><td>Zambia</td><td>University of Zambia &ndash; Lusaka</td></tr>
+                    <tr><td>Hulunim Gatew Tariku</td><td>Uganda (Ethiopian)</td><td>Makerere University</td></tr>
+                    <tr><td>Loukaiya Zorobouragui</td><td>Benin</td><td>University of Parakou</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="organizer">
+    <div class="container">
+        <h2 class="section-title">Course <span>Organizers</span></h2>
+        <div class="developer-card">
+            <div class="developer-avatar">MC</div>
+            <div class="developer-info">
+                <h3>Prof. Mizeck Chagunda</h3>
+                <h4>Course Lead &amp; Organizer, University of Edinburgh</h4>
+            </div>
+        </div>
+        <div class="developer-card" style="margin-top: 1.5rem;">
+            <div class="developer-avatar">RM</div>
+            <div class="developer-info">
+                <h3>Prof. Raphael Mrode</h3>
+                <h4>Course Lead &amp; Organizer, SRUC &amp; ILRI</h4>
+            </div>
+        </div>
+        <div class="developer-card" style="margin-top: 1.5rem;">
+            <div class="developer-avatar">IH</div>
+            <div class="developer-info">
+                <h3>Dr. Isidore Houaga</h3>
+                <h4>Course Lead &amp; Organizer, ILRI Nairobi</h4>
+                <p>Dr. Isidore Houaga is responsible for organizing this training event, designing the course program, coordinating logistics, and assigning lecturers and instructors. He is also involved in developing course exercises and teaching practical sessions.</p>
+                <p style="margin-top: 1rem;"><strong style="color: var(--text-light);">For any questions about the course:</strong> <a href="mailto:I.Houaga@cgiar.org" style="color: var(--primary-gold);">I.Houaga@cgiar.org</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="developer">
+    <div class="container">
+        <h2 class="section-title">Website <span>Maintainer</span></h2>
+        <div class="developer-card">
+            <div class="developer-avatar">SA</div>
+            <div class="developer-info">
+                <h3>Dr. Setegn Worku Alemu, PhD</h3>
+                <h4>Quantitative Geneticist, ILRI Nairobi</h4>
+                <p>This website is designed and maintained by Dr. Setegn Worku Alemu. He is also involved in developing course exercises and teaching practical sessions to ensure all materials are relevant and openly accessible to scientists across Africa.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 ILRI Genomics Training Programme | Developed by <a href="#developer">Dr. Setegn W. Alemu</a></p>
+        <p style="margin-top: 0.5rem;">Open Access | Transparent | For Africa</p>
+    </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function() {
+    var map = L.map('participant-map', { scrollWheelZoom: false }).setView([10, 30], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        maxZoom: 18
+    }).addTo(map);
+
+    var countries = [
+        { name: "Kenya", lat: -1.29, lng: 36.82, inPerson: 1, online: 2 },
+        { name: "Uganda", lat: 1.37, lng: 32.29, inPerson: 1, online: 4 },
+        { name: "Ethiopia", lat: 9.15, lng: 40.49, inPerson: 1, online: 5 },
+        { name: "India", lat: 20.59, lng: 78.96, inPerson: 1, online: 2 },
+        { name: "South Africa", lat: -30.56, lng: 22.94, inPerson: 2, online: 1 },
+        { name: "Benin", lat: 9.31, lng: 2.32, inPerson: 1, online: 2 },
+        { name: "Nigeria", lat: 9.08, lng: 8.68, inPerson: 1, online: 2 },
+        { name: "Zimbabwe", lat: -19.02, lng: 29.15, inPerson: 1, online: 1 },
+        { name: "Burundi", lat: -3.37, lng: 29.92, inPerson: 1, online: 1 },
+        { name: "Rwanda", lat: -1.94, lng: 29.87, inPerson: 1, online: 1 },
+        { name: "Ghana", lat: 7.95, lng: -1.02, inPerson: 1, online: 1 },
+        { name: "Eswatini", lat: -26.52, lng: 31.47, inPerson: 1, online: 1 },
+        { name: "Morocco", lat: 31.79, lng: -7.09, inPerson: 1, online: 0 },
+        { name: "Namibia", lat: -22.96, lng: 18.49, inPerson: 1, online: 0 },
+        { name: "Cameroon", lat: 7.37, lng: 12.35, inPerson: 1, online: 0 },
+        { name: "Sierra Leone", lat: 8.46, lng: -11.78, inPerson: 1, online: 0 },
+        { name: "Eritrea", lat: 15.18, lng: 39.78, inPerson: 1, online: 0 },
+        { name: "The Gambia", lat: 13.44, lng: -15.31, inPerson: 1, online: 0 },
+        { name: "Botswana", lat: -22.33, lng: 24.68, inPerson: 1, online: 0 },
+        { name: "Djibouti", lat: 11.83, lng: 42.59, inPerson: 1, online: 0 },
+        { name: "Nepal", lat: 28.39, lng: 84.12, inPerson: 0, online: 2 },
+        { name: "DRC", lat: -4.04, lng: 21.76, inPerson: 0, online: 1 },
+        { name: "Iran", lat: 32.43, lng: 53.69, inPerson: 0, online: 1 },
+        { name: "Bangladesh", lat: 23.69, lng: 90.36, inPerson: 0, online: 1 },
+        { name: "Pakistan", lat: 30.38, lng: 69.35, inPerson: 0, online: 1 },
+        { name: "Zambia", lat: -13.13, lng: 28.64, inPerson: 0, online: 1 }
+    ];
+
+    var faculty = [
+        { name: "Prof. Mizeck Chagunda", initials: "MC", title: "Professor", affiliation: "Centre for Tropical Livestock Genetics and Health, The Roslin Institute, University of Edinburgh, UK", interests: "Quantitative genetics and genomics, livestock methane emissions and climate resilience traits.", lat: 55.95, lng: -3.19, offset: 0 },
+        { name: "Prof. Raphael Mrode", initials: "RM", title: "Professor", affiliation: "Scotland Rural College, Edinburgh, UK & ILRI, Nairobi, Kenya", interests: "Quantitative genetics and genomics, breeding programme design and optimisation, innovative genomic approaches for genetic improvement in low-input environments.", lat: 55.95, lng: -3.19, offset: 1 },
+        { name: "Dr. Chrissy Rochus", initials: "CR", title: "Core Scientist in Quantitative Genetics", affiliation: "The Roslin Institute, University of Edinburgh, UK", interests: "Genomic data to study genetic diversity and adaptation in domestic species including sheep, chickens, pigs, turkeys, and dairy cattle.", lat: 55.95, lng: -3.19, offset: 2 },
+        { name: "Dr. Oswald Matika (Ozzie)", initials: "OM", title: "Core Scientist - Genetics and Genomics", affiliation: "The Roslin Institute, University of Edinburgh, UK", interests: "Quantitative Trait Loci, Linkage Analysis, Quantitative Genetics, Marker Assisted Selection, Genomic Selection and Bioinformatics.", lat: 55.95, lng: -3.19, offset: 3 },
+        { name: "Dr. Getinet Mekuriaw Tarekegn", initials: "GT", title: "Scientist", affiliation: "Animal and Veterinary Sciences, Scotland's Rural College, Edinburgh, UK", interests: "Livestock Genetics and Genomics, Bioinformatics.", lat: 55.95, lng: -3.19, offset: 4 },
+        { name: "Dr. Isidore Houaga", initials: "IH", title: "Scientist - Statistical Geneticist", affiliation: "International Livestock Research Institute (ILRI), Nairobi, Kenya", interests: "Quantitative genetics and genomics, phenomics, statistical modelling, breeding programme design, AI and machine learning applied to livestock climate resilience traits.", lat: -1.27, lng: 36.72, offset: 0 },
+        { name: "Dr. Chinyere Ekine-Dzivenu", initials: "CE", title: "Scientist - Statistical Genetics and Genomics", affiliation: "International Livestock Research Institute (ILRI), Nairobi, Kenya", interests: "Quantitative genetics and genomics, breeding for climate resilience and sustainability.", lat: -1.27, lng: 36.72, offset: 1 },
+        { name: "Dr. Setegn W. Alemu", initials: "SA", title: "Scientist - Statistical Genetics", affiliation: "International Livestock Research Institute (ILRI), Nairobi, Kenya", interests: "Genomic selection, quantitative genetics, methane emissions genetics, multi-omics integration (genome and microbiome), neural network GBLUP methods, livestock breeding in low-input systems.", lat: -1.27, lng: 36.72, offset: 2 }
+    ];
+
+    // ILRI Nairobi label
+    L.marker([-1.2685, 36.7226], {
+        icon: L.divIcon({
+            className: '',
+            html: '<div style="background:#D4A853;color:#1A1A2E;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.4);">ILRI Nairobi</div>',
+            iconAnchor: [30, 30]
+        })
+    }).addTo(map);
+
+    // Edinburgh label
+    L.marker([55.95, -3.19], {
+        icon: L.divIcon({
+            className: '',
+            html: '<div style="background:#D4A853;color:#1A1A2E;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.4);">Edinburgh, UK</div>',
+            iconAnchor: [35, 40]
+        })
+    }).addTo(map);
+
+    // Participant circles
+    countries.forEach(function(c) {
+        if (c.inPerson > 0) {
+            L.circleMarker([c.lat, c.lng], {
+                radius: 5 + c.inPerson * 3,
+                color: '#2ecc71',
+                fillColor: '#2ecc71',
+                fillOpacity: 0.7,
+                weight: 2
+            }).addTo(map).bindPopup('<strong>' + c.name + '</strong><br>In-Person: ' + c.inPerson);
+        }
+        if (c.online > 0) {
+            var off = c.inPerson > 0 ? 0.8 : 0;
+            L.circleMarker([c.lat + off, c.lng + off], {
+                radius: 5 + c.online * 2,
+                color: '#3498db',
+                fillColor: '#3498db',
+                fillOpacity: 0.6,
+                weight: 2
+            }).addTo(map).bindPopup('<strong>' + c.name + '</strong><br>Online: ' + c.online);
+        }
+    });
+
+    // Faculty diamond markers
+    function diamondIcon(initials, idx) {
+        var angle = (idx * 72) % 360;
+        var rad = angle * Math.PI / 180;
+        var r = 18;
+        var ox = Math.cos(rad) * r;
+        var oy = Math.sin(rad) * r;
+        return L.divIcon({
+            className: '',
+            html: '<div style="position:relative;left:' + ox + 'px;top:' + oy + 'px;width:30px;height:30px;background:linear-gradient(135deg,#D4A853,#C75B39);transform:rotate(45deg);border-radius:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(212,168,83,0.5);cursor:pointer;border:2px solid rgba(255,255,255,0.3);"><span style="transform:rotate(-45deg);color:#1A1A2E;font-weight:700;font-size:10px;font-family:Playfair Display,serif;">' + initials + '</span></div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            popupAnchor: [0, -15]
+        });
+    }
+
+    faculty.forEach(function(f) {
+        var popup = '<div style="min-width:220px;font-family:Source Sans Pro,sans-serif;">' +
+            '<div style="background:linear-gradient(135deg,#D4A853,#C75B39);color:#1A1A2E;padding:8px 12px;border-radius:6px 6px 0 0;margin:-8px -19px 8px -19px;">' +
+            '<strong style="font-size:1rem;">' + f.name + '</strong><br>' +
+            '<span style="font-size:0.8rem;opacity:0.85;">' + f.title + '</span></div>' +
+            '<div style="font-size:0.85rem;color:#555;margin-bottom:6px;"><strong>Affiliation:</strong> ' + f.affiliation + '</div>' +
+            '<div style="font-size:0.85rem;color:#555;"><strong>Interests:</strong> ' + f.interests + '</div>' +
+            '</div>';
+        L.marker([f.lat, f.lng], { icon: diamondIcon(f.initials, f.offset), zIndexOffset: 1000 })
+            .addTo(map).bindPopup(popup, { maxWidth: 300 });
+    });
+})();
+</script>
+
+</body>
+</html>
+
+<!--
+=====================================================================
+HOW TO ADD COURSE MATERIALS - QUICK GUIDE FOR SETEGN
+=====================================================================
+
+STEP 1: Create folder structure on your server:
+   materials/
+   ├── day1/
+   ├── day2/
+   ├── day3/
+   ├── day4/
+   ├── day5/
+   ├── day6/
+   └── resources/
+
+STEP 2: Upload your files to the appropriate folder
+
+STEP 3: In the HTML, find the material and REPLACE:
+   <span class="coming-soon">Coming Soon</span>
+   
+   WITH:
+   <a href="materials/day1/YOUR_FILENAME.pdf" class="download-btn">Download</a>
+
+=====================================================================
+ICON CLASSES (change based on file type):
+   pdf  = Red      (PDF files)
+   ppt  = Orange   (PowerPoint)
+   r    = Blue     (R scripts)
+   data = Green    (CSV/data files)
+   zip  = Purple   (ZIP archives)
+   doc  = Blue     (Word/text docs)
+
+=====================================================================
+EXAMPLE - Adding a lecture PDF:
+
+BEFORE:
+<li>
+    <div class="material-info">
+        <div class="material-icon pdf">PDF</div>
+        <div class="material-name">Livestock Phenomics<span>Prof. Mizeck Chagunda</span></div>
+    </div>
+    <span class="coming-soon">Coming Soon</span>
+</li>
+
+AFTER:
+<li>
+    <div class="material-info">
+        <div class="material-icon pdf">PDF</div>
+        <div class="material-name">Livestock Phenomics<span>Prof. Mizeck Chagunda</span></div>
+    </div>
+    <a href="materials/day1/phenomics_lecture.pdf" class="download-btn">Download</a>
+</li>
+
+=====================================================================
+TO ADD A NEW MATERIAL (copy this template):
+
+<li>
+    <div class="material-info">
+        <div class="material-icon pdf">PDF</div>
+        <div class="material-name">YOUR TITLE HERE<span>Instructor Name</span></div>
+    </div>
+    <a href="materials/dayX/filename.pdf" class="download-btn">Download</a>
+</li>
+
+=====================================================================
+-->
